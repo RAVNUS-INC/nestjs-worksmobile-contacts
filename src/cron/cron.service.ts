@@ -75,7 +75,7 @@ export class CronService {
       { isInternal: 'Y' },
       'users',
       (user) => ({
-        name: `${user?.userName?.lastName ?? ''}${user?.userName?.firstName ?? ''} ${user?.organizations?.[0]?.positionName ?? ''}`,
+        name: `${user?.userName?.lastName ?? ''}${user?.userName?.firstName ?? ''} ${user?.organizations?.[0]?.orgUnits?.[0]?.positionName ?? ''}`,
         isInternal: 'Y',
         id: user.userId,
         emails: JSON.stringify([]),
