@@ -38,6 +38,19 @@ NAVER_WORKS_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----
 "
 ```
 
+아래에서부터는 시놀로지 Container Manager를 활용한 사용방법임.
+
+시놀로지 제어판 접속 후 Container Manager 실행
+(Container Manager가 없다면 패키지 센터에서 설치)
+
+프로젝트 > 생성
+경로에서 아까 설정한 .env까지 포함된 폴더 선택 후
+기존 docker-compose.yaml 사용하기 선택
+
+<img width="1198" alt="2" src="https://github.com/RAVNUS-INC/nestjs-worksmobile-contacts/assets/43020330/3f4d1df0-331e-47e2-8e14-3b55500e75d9">
+
+웹포털 설정은 사용안함 후 자동 시작
+
 ## 사용 기술
 - NestJS
 - MySQL
