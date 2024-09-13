@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import axios from 'axios';
+import axios, { HttpStatusCode } from 'axios';
 import { WorksmobileEndpoint } from './constants/worksmobile-endpoint.constant';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
@@ -114,8 +114,8 @@ export class WorksmobileService {
   async getContacts(options?: {
     lastSyncTime?: string | undefined;
   }): Promise<ContactListResponseDto> {
-    return await axios
-      .get(`${WorksmobileEndpoint.BASE}/contacts`, {
+    try {
+      const res = await axios.get(`${WorksmobileEndpoint.BASE}/contacts`, {
         headers: {
           Authorization: `Bearer ${await this.getToken()}`,
         },
@@ -124,32 +124,48 @@ export class WorksmobileService {
           orderBy: 'modifiedTime desc', // 수정 시간 기준으로 정렬 (마지막 시간을 기록하며 최신화 하기 위해)
           ...(await this.getContactCustomParamByOptions(options)),
         },
-      })
-      .then((res) => plainToInstance(ContactListResponseDto, res.data))
-      .catch((err) => {
-        console.error(err);
-        throw new Error('getContacts 목록을 가져오는데 실패했습니다.');
       });
+
+      return plainToInstance(ContactListResponseDto, res.data);
+    } catch (e) {
+      console.error(e);
+      if (
+        axios.isAxiosError(e) &&
+        e.response?.status === HttpStatusCode.Unauthorized
+      ) {
+        await this.redisService.del(RedisKey.AUTH_WORKSMOBILE);
+      }
+
+      throw new Error('getContacts 목록을 가져오는데 실패했습니다.');
+    }
   }
 
   /**
    * https://developers.worksmobile.com/kr/docs/user-list
    */
   async getDirectoryUsers(): Promise<DirectoryUserListResponseDto> {
-    return await axios
-      .get(`${WorksmobileEndpoint.BASE}/users`, {
+    try {
+      const res = await axios.get(`${WorksmobileEndpoint.BASE}/users`, {
         headers: {
           Authorization: `Bearer ${await this.getToken()}`,
         },
         params: {
           count: 100, // 한 번에 가져오는 데이터 크기 (최대 100)
         },
-      })
-      .then((res) => plainToInstance(DirectoryUserListResponseDto, res.data))
-      .catch((err) => {
-        console.error(err);
-        throw new Error('getDirectoryUsers 목록을 가져오는데 실패했습니다.');
       });
+
+      return plainToInstance(DirectoryUserListResponseDto, res.data);
+    } catch (e) {
+      console.error(e);
+      if (
+        axios.isAxiosError(e) &&
+        e.response?.status === HttpStatusCode.Unauthorized
+      ) {
+        await this.redisService.del(RedisKey.AUTH_WORKSMOBILE);
+      }
+
+      throw new Error('getDirectoryUsers 목록을 가져오는데 실패했습니다');
+    }
   }
 
   async getContactCustomParamByOptions(options?: {
